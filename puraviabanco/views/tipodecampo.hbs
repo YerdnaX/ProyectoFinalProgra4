@@ -1,0 +1,62 @@
+﻿<main class="contenedor">
+    <section class="seccion">
+      <h1 class="titulo-seccion">Administrar tipo de cambio</h1>
+      <p class="subtitulo">Compra y venta de USD aplicadas a operaciones en dólares.</p>
+    </section>
+
+    <section class="seccion">
+      <table class="tabla-resumen">
+        <thead>
+          <tr>
+            <th>Compra</th>
+            <th>Venta</th>
+            <th>Fecha de modificación</th>
+            <th>Registrado por</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#if tiposCambioLista.length}}
+          {{#each tiposCambioLista}}
+          <tr>
+            <td>{{this.tipoCambioCompraTexto}}</td>
+            <td>{{this.tipoCambioVentaTexto}}</td>
+            <td>{{this.fechaModificacionTexto}}</td>
+            <td>{{this.registradoPorTexto}}</td>
+            <td><span class="estado {{this.estadoClase}}">{{this.estadoTexto}}</span></td>
+          </tr>
+          {{/each}}
+          {{else}}
+          <tr>
+            <td colspan="5">No hay tipos de cambio registrados.</td>
+          </tr>
+          {{/if}}
+        </tbody>
+      </table>
+
+      <form class="formulario" style="margin-top:1.2rem;">
+        <div class="grid-formularios">
+          <div class="campo">
+            <label for="compra">Tipo de cambio compra</label>
+            <input id="compra" type="number" step="0.01" min="0" placeholder="Ej. 522">
+          </div>
+          <div class="campo">
+            <label for="venta">Tipo de cambio venta</label>
+            <input id="venta" type="number" step="0.01" min="0" placeholder="Ej. 534">
+          </div>
+          <div class="campo">
+            <label for="registrado">Registrado por</label>
+            <input id="registrado" type="text" placeholder="Usuario responsable">
+          </div>
+        </div>
+        <div class="botones">
+          <button class="btn" id="btn-actualizar-tipo-cambio" type="button">Actualizar tipo de cambio</button>
+          <button class="btn btn-secundario" type="reset">Limpiar</button>
+          <a class="btn btn-secundario" href="/configuracion">Volver</a>
+        </div>
+        <p class="subtitulo">Valores deben ser numéricos positivos.</p>
+      </form>
+    </section>
+  </main>
+  <script src="/javascripts/configuracion-logica.js"></script>
+

@@ -1,0 +1,58 @@
+﻿<main class="contenedor">
+    <section class="seccion">
+      <h1 class="titulo-seccion">Registro de transacciones bancarias</h1>
+      <p class="subtitulo">Registro actualizado de todas las transacciones.</p> 
+    </section>
+
+    <section class="seccion" style="padding-top:0;">
+      <div class="grid-tarjetas">
+        <article class="tarjeta">
+          <h3>Operación de depósito</h3>
+          <a class="btn" href="/transacciones/deposito">Ir a depósito</a>
+        </article>
+        <article class="tarjeta">
+          <h3>Operación de retiro</h3>
+          <a class="btn" href="/transacciones/retiro">Ir a retiro</a>
+        </article>
+      </div>
+    </section>
+
+    <section class="seccion">
+      <h2 class="titulo-seccion">Historial reciente</h2>
+      <table class="tabla-resumen">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Cuenta</th>
+            <th>Cliente</th>
+            <th>Tipo</th>
+            <th>Descripción</th>
+            <th>Fecha</th>
+            <th>Monto</th>
+            <th>Moneda</th>
+            <th>Tipo de cambio</th>
+            <th>Saldo final</th>
+            <th>Referencia</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each transaccionesLista}}
+          <tr>
+            <td>{{this.id}}</td>
+            <td>{{this.cuenta}}</td>
+            <td>{{this.cliente}}</td>
+            <td>{{this.tipo}}</td>
+            <td>{{this.descripcion}}</td>
+            <td>{{this.fecha}}</td>
+            <td>{{this.monto}}</td>
+            <td>{{this.moneda}}</td>
+            <td>{{this.tipoCambio}}</td>
+            <td>{{this.saldoFinal}}</td>
+            <td>{{this.referencia}}</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </section>
+  </main>
+

@@ -1,0 +1,94 @@
+﻿<main class="contenedor">
+    <section class="seccion">
+        <h1 class="titulo-seccion">Solicitud de prestamos</h1>
+        <div class="kpi-grid">
+            <div class="kpi">
+                <div class="etiqueta">Clientes activos</div>
+                <div class="valor">{{clientesActivos}}</div>
+                <div class="estado estado-libre">Con estado Activo</div>
+            </div>
+            <div class="kpi">
+                <div class="etiqueta">Prestamos solicitados</div>
+                <div class="valor">{{prestamosSolicitados}}</div>
+                <div class="estado estado-reservada">Solicitudes registradas</div>
+            </div>
+            <div class="kpi">
+                <div class="etiqueta">Monto total prestado</div>
+                <div class="valor">{{montoTotalPrestado}}</div>
+                <div class="estado estado-libre">Ultima solicitud: {{ultimaAltaHora}}</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="seccion">
+        <h2 class="titulo-seccion">Lista de prestamos solicitados</h2>
+        <div class="tabla-center">
+            <table class="tabla-resumen">
+                <thead>
+                    <tr>
+                        <th>Numero de solicitud</th>
+                        <th>Identificador de cliente</th>
+                        <th>Nombre cliente</th>
+                        <th>Monto</th>
+                        <th>Meses plazo</th>
+                        <th>Cuota mensual</th>
+                        <th>Fecha de solicitud</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each solicitudesPrestamoLista}}
+                    <tr>
+                        <td>{{this.numeroSolicitud}}</td>
+                        <td>{{this.identificadorCliente}}</td>
+                        <td>{{this.nombreCliente}}</td>
+                        <td>{{this.montoPrestamo}}</td>
+                        <td>{{this.plazoMeses}}</td>
+                        <td>{{this.cuotaMensual}}</td>
+                        <td>{{this.fechaSolicitud}}</td>
+                        <td><span class="estado {{this.estadoClase}}">{{this.estado}}</span></td>
+                    </tr>
+                    {{else}}
+                    <tr>
+                        <td colspan="8">No hay solicitudes de prestamo registradas.</td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="seccion">
+        <h2 class="titulo-seccion">Crear Prestamos</h2>
+        <form class="formulario">
+            <div class="grid-formularios">
+                <div class="campo">
+                    <label for="id-cliente">Identificador de solicitante (cedula, extranjero o pasaporte)</label>
+                    <input id="id-cliente" type="text" placeholder="Ej. 1-0456-1234 / P-99332211">
+                </div>
+            </div>
+            <div class="grid-formularios">
+                <div class="campo">
+                    <label for="monto">Monto total a solicitar en colones</label>
+                    <input id="monto" type="text" placeholder="Ej. 1,000,000">
+                </div>
+            </div>
+            <div class="campo">
+                <label for="plazomeses">Plazo meses</label>
+                <select id="plazomeses">
+                    <option value="4">4 Meses</option>
+                    <option value="6">6 Meses</option>
+                    <option value="9">9 Meses</option>
+                    <option value="12">12 Meses</option>
+                </select>
+            </div>
+
+            <div class="botones">
+                <button class="btn" id="btn-solicitarprestamo" type="button" onclick="manejarSolicitarPrestamo(event)">Solicitar Prestamo</button>
+                <button class="btn btn-secundario" type="reset">Limpiar</button>
+            </div>
+        </form>
+    </section>
+</main>
+<script src="/javascripts/prestamos-logica.js"></script>
+

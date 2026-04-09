@@ -1,0 +1,101 @@
+﻿<main class="contenedor">
+  <section class="seccion">
+    <h1 class="titulo-seccion">Administración de meseros</h1>
+    <p class="subtitulo">Consulta, crea, modifica o elimina meseros. Asigna credenciales de acceso de forma manual.</p>
+
+    <h2 class="titulo-seccion">Listado de meseros</h2>
+    <table class="tabla-resumen">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Identificación</th>
+          <th>Teléfono</th>
+          <th>Correo</th>
+          <th>Turno</th>
+          <th>Usuario</th>
+          <th>Notas</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#if meseros}}
+        {{#each meseros}}
+        <tr>
+          <td>{{nombre}}</td>
+          <td>{{identificacion}}</td>
+          <td>{{telefono}}</td>
+          <td>{{correo}}</td>
+          <td>{{turno}}</td>
+          <td>{{usuario_id}}</td>
+          <td>{{observaciones}}</td>
+          <td><button class="btn btn-secundario" type="button"
+              onclick="EliminarMesero({{id}}, {{usuario_id}})">Eliminar</button></td>
+        </tr>
+        {{/each}}
+        {{else}}
+        <tr>
+          <td colspan="8">No hay meseros registrados.</td>
+        </tr>
+        {{/if}}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="seccion">
+    <h2 class="titulo-seccion">Crear o modificar mesero</h2>
+    <form class="formulario">
+      <div class="grid-formularios">
+        <div class="campo">
+          <label for="nombre">Nombre completo</label>
+          <input id="nombre" type="text" placeholder="Nombre y apellidos">
+        </div>
+        <div class="campo">
+          <label for="id">Identificación</label>
+          <input id="id" type="text" placeholder="Cédula o identificación">
+        </div>
+        <div class="campo">
+          <label for="telefono">Teléfono</label>
+          <input id="telefono" type="tel" placeholder="Ej. 8888-8888">
+        </div>
+        <div class="campo">
+          <label for="correo">Correo</label>
+          <input id="correo" type="email" placeholder="correo@ejemplo.com">
+        </div>
+        <div class="campo">
+          <label for="turno">Turno</label>
+          <select id="turno">
+            <option>Mañana</option>
+            <option>Tarde</option>
+            <option>Noche</option>
+            <option>Fin de semana</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid-formularios">
+        <div class="campo">
+          <label for="usuario">Usuario</label>
+          <input id="usuario" type="text" placeholder="Usuario para acceso">
+        </div>
+        <div class="campo">
+          <label for="password">Contraseña</label>
+          <input id="password" type="password" placeholder="Contraseña">
+        </div>
+        <div class="campo">
+          <label for="observaciones">Observaciones</label>
+          <textarea id="observaciones" placeholder="Notas adicionales"></textarea>
+        </div>
+      </div>
+
+      <div class="botones">
+        <button class="btn" type="button" onclick="GuardarActualizarMesero()">Guardar / Actualizar</button>
+        <button class="btn btn-secundario" type="reset">Limpiar</button>
+      </div>
+
+      <div class="botones" style="margin-top:1.8rem;">
+        <a class="btn btn-secundario" href="/admin">Atrás</a>
+      </div>
+    </form>
+  </section>
+</main>
+
+<script src="/javascripts/admin-meseros-logica.js"></script>

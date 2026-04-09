@@ -1,0 +1,135 @@
+﻿<main class="contenedor">
+    <section class="seccion">
+      <h1 class="titulo-seccion">Registro de clientes</h1>
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="etiqueta">Clientes activos</div>
+          <div class="valor">{{clientesActivos}}</div>
+          <div class="estado estado-libre">Con estado Activo</div>
+        </div>
+        <div class="kpi">
+          <div class="etiqueta">Clientes inactivos</div>
+          <div class="valor">{{clientesInactivos}}</div>
+          <div class="estado estado-reservada">Sin operaciones permitidas</div>
+        </div>
+        <div class="kpi">
+          <div class="etiqueta">Última alta</div>
+          <div class="valor">{{ultimaAltaFecha}}</div>
+          <div class="estado estado-libre">{{ultimaAltaHora}}</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="seccion">
+      <h2 class="titulo-seccion">Lista de clientes</h2>
+      <div class="tabla-center">
+        <table class="tabla-resumen">
+          <thead>
+            <tr>
+              <th>Identificador</th>
+              <th>Nombre completo</th>
+              <th>Correo</th>
+              <th>Teléfono</th>
+              <th>F. nacimiento</th>
+              <th>Ocupación</th>
+              <th>Dirección</th>
+              <th>Creado</th>
+              <th>Estado</th>
+              <th>Perfil</th>
+                <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each clientesLista}}
+            <tr>
+              <td>{{this.identificadorCliente}}</td>
+              <td>{{this.nombreCompleto}}</td>
+              <td>{{this.correoElectronico}}</td>
+              <td class="nowrap">{{this.telefono}}</td>
+              <td>{{this.fechaNacimientoTexto}}</td>
+              <td>{{this.ocupacion}}</td>
+              <td>{{this.direccion}}</td>
+              <td>{{this.creadoTexto}}</td>
+              <td><span class="estado {{this.estadoClase}}">{{this.estado}}</span></td>
+              <td>
+                <a class="btn btn-secundario btn-icon" href="/clientes/transaccionescliente?id={{this.identificadorClienteUrl}}"
+                  aria-label="Ver transacciones">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="11" cy="11" r="6"></circle>
+                    <path d="M16 16l4 4"></path>
+                  </svg>
+                </a>
+              </td>
+              <td>
+                <form method="post" action="/api/clientes/eliminar" style="display:inline;" data-eliminar="cliente">
+                  <input type="hidden" name="identificadorCliente" value="{{this.identificadorCliente}}">
+                  <button class="btn btn-secundario btn-icon" type="submit">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M4 7h16"></path>
+                      <path d="M9 4h6"></path>
+                      <path d="M10 10v7"></path>
+                      <path d="M14 10v7"></path>
+                      <rect x="5" y="7" width="14" height="13" rx="2"></rect>
+                    </svg>
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="seccion">
+      <h2 class="titulo-seccion">Crear o modificar cliente</h2>
+      <form class="formulario">
+        <div class="grid-formularios">
+          <div class="campo">
+            <label for="id-cliente">Identificador (cédula, extranjero o pasaporte)</label>
+            <input id="id-cliente" type="text" placeholder="Ej. 1-0456-1234 / P-99332211">
+          </div>
+          <div class="campo">
+            <label for="nombre">Nombre completo</label>
+            <input id="nombre" type="text" placeholder="Nombre y apellidos">
+          </div>
+          <div class="campo">
+            <label for="correo">Correo electrónico</label>
+            <input id="correo" type="email" placeholder="correo@ejemplo.com">
+          </div>
+          <div class="campo">
+            <label for="telefono">Número de teléfono</label>
+            <input id="telefono" type="tel" placeholder="8888-8888">
+          </div>
+          <div class="campo">
+            <label for="fecha-nacimiento">Fecha de nacimiento</label>
+            <input id="fecha-nacimiento" type="date">
+          </div>
+        </div>
+
+        <div class="grid-formularios">
+          <div class="campo">
+            <label for="direccion">Dirección</label>
+            <textarea id="direccion" placeholder="Provincia, cantón, distrito"></textarea>
+          </div>
+          <div class="campo">
+            <label for="ocupacion">Ocupación</label>
+            <input id="ocupacion" type="text" placeholder="Profesión u oficio">
+          </div>
+          <div class="campo">
+            <label for="estado">Estado del cliente</label>
+            <select id="estado">
+              <option>Activo</option>
+              <option>Inactivo</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="botones">
+          <button class="btn" id="btn-guardar-actualizar" type="button">Guardar / Actualizar</button>
+          <button class="btn btn-secundario" type="reset">Limpiar</button>
+        </div>
+      </form>
+    </section>
+  </main>
+  <script src="/javascripts/clientes-logica.js"></script>

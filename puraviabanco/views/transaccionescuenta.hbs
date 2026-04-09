@@ -1,0 +1,60 @@
+﻿<main class="contenedor">
+    <section class="seccion">
+      <h1 class="titulo-seccion">Transacciones de la cuenta</h1>
+      <p class="subtitulo">Movimientos asociados a la cuenta seleccionada.</p>
+
+      <div class="kpi-grid" style="margin-bottom:1.2rem;">
+        <div class="kpi">
+          <div class="etiqueta">Cuenta</div>
+          <div class="valor">{{cuentaIban}}</div>
+          <div class="estado estado-libre">Alias: {{cuentaAlias}}</div>
+        </div>
+        <div class="kpi">
+          <div class="etiqueta">Cliente</div>
+          <div class="valor">{{clienteNombre}}</div>
+          <div class="estado estado-libre">{{clienteEstado}}</div>
+        </div>
+        <div class="kpi">
+          <div class="etiqueta">Saldo actual</div>
+          <div class="valor">{{saldoActual}}</div>
+          <div class="estado estado-reservada">{{monedaCuenta}}</div>
+        </div>
+      </div>
+
+      <table class="tabla-resumen">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Tipo</th>
+            <th>Descripción</th>
+            <th>Monto</th>
+            <th>Moneda</th>
+            <th>Tipo de cambio</th>
+            <th>Saldo final</th>
+            <th>Referencia</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each transaccionesCuenta}}
+          <tr>
+            <td>{{this.id}}</td>
+            <td>{{this.fecha}}</td>
+            <td>{{this.tipo}}</td>
+            <td>{{this.descripcion}}</td>
+            <td>{{this.monto}}</td>
+            <td>{{this.moneda}}</td>
+            <td>{{this.tipoCambio}}</td>
+            <td>{{this.saldoFinal}}</td>
+            <td>{{this.referencia}}</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+
+      <div class="botones" style="margin-top:1.2rem;">
+        <a class="btn btn-secundario" href="/cuentas">Volver a cuentas</a>
+      </div>
+    </section>
+  </main>
+

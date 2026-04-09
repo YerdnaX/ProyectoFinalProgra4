@@ -1,0 +1,84 @@
+﻿<main class="contenedor">
+    <section class="seccion">
+      <h1 class="titulo-seccion">Panel de Operaciones</h1>
+      <p class="subtitulo">Visión de clientes, cuentas, transacciones y parámetros bancarios.</p>
+
+      <div class="kpi-grid kpi-grid-panel">
+        <div class="kpi">
+          <div class="etiqueta">Clientes registrados</div>
+          <div class="valor">{{clientesRegistrados}}</div>
+          <div class="estado estado-libre">{{clientesInactivosTexto}}</div>
+        </div>
+        <div class="kpi">
+          <div class="etiqueta">Cuentas activas</div>
+          <div class="valor">{{cuentasActivas}}</div>
+          <div class="estado estado-libre">{{cuentasActivasPorcentajeTexto}}</div>
+        </div>
+        <div class="kpi">
+          <div class="etiqueta">Saldo global (CRC)</div>
+          <div class="valor">{{saldoGlobalCRC}}</div>
+          <div class="estado estado-reservada">Incluye USD convertido</div>
+        </div>
+        <div class="kpi">
+          <div class="etiqueta">Movimientos hoy</div>
+          <div class="valor">{{movimientosHoy}}</div>
+          <div class="estado estado-libre">Depósitos, retiros y comisiones</div>
+        </div>
+        <div class="kpi kpi-tipo-cambio">
+          <div class="etiqueta">Tipo de cambio</div>
+          <div class="valor">{{tipoCambioTexto}}</div>
+          <div class="estado estado-reservada">{{tipoCambioActualizadoTexto}}</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="seccion">
+      <h2 class="titulo-seccion">Accesos rápidos</h2>
+      <div class="grid-tarjetas">
+        <article class="tarjeta tarjeta-linea">
+          <div>
+            <h3>Registro de clientes</h3>
+            <p>Modifica el registro de clientes.</p>
+          </div>
+          <a class="btn" href="/clientes">Abrir</a>
+        </article>
+        <article class="tarjeta tarjeta-linea">
+          <div>
+            <h3>Administración de cuentas</h3>
+            <p>Modifica y gestiona las cuentas bancarias.</p>
+          </div>
+          <a class="btn" href="/cuentas">Abrir</a>
+        </article>
+        <article class="tarjeta tarjeta-linea">
+          <div>
+            <h3>Transacciones y historial</h3>
+            <p>Realiza y consulta las transacciones realizadas.</p>
+          </div>
+          <a class="btn" href="/transacciones">Abrir</a>
+        </article>
+        <article class="tarjeta tarjeta-linea">
+          <div>
+            <h3>Rangos de Comisión</h3>
+            <p>Montos mínimo/máximo y porcentaje aplicado a cada transacción.</p>
+          </div>
+          <a class="btn" href="/configuracion">Abrir</a>
+        </article>
+      </div>
+    </section>
+
+    <section class="seccion">
+      <div class="banner">
+        <div>
+          <h2>Seguridad operacional</h2>
+          <p>Clientes y cuentas inactivas no pueden operar. Cada movimiento guarda referencia, tipo de cambio aplicado y
+            saldo final.</p>
+          <div class="chips">
+            <span class="chip">No se eliminan transacciones</span>
+            <span class="chip">Comisión ligada a retiro</span>
+            <span class="chip">Registros confiables</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+

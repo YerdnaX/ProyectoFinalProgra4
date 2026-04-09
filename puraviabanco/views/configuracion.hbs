@@ -1,0 +1,52 @@
+﻿<main class="contenedor">
+    <section class="seccion">
+      <h1 class="titulo-seccion">Parámetros del sistema</h1>
+      <p class="subtitulo">Rangos de comisión y tipo de cambio que afectan a cada retiro y transacción en USD.</p>
+    </section>
+
+    <section class="seccion">
+      <h2 class="titulo-seccion">Resumen de Configuración</h2>
+      <div class="kpi-grid" style="margin-bottom:1.2rem;">
+        <div class="kpi">
+          <div class="etiqueta">Tipo de cambio</div>
+          <div class="valor">{{tipoCambioTexto}}</div>
+          <div class="estado estado-reservada">{{tipoCambioActualizadoTexto}}</div>
+        </div>
+        <div class="kpi kpi-rangos">
+          <div class="etiqueta">Rangos de comisión</div>
+          <ul class="kpi-rangos-lista" aria-label="Resumen de rangos de comisión">
+            {{#if rangosComision}}
+              {{#each rangosComision}}
+                <li class="kpi-rango-item">
+                  <span class="rango-nombre">{{this.nombre}}</span>
+                  <span class="rango-monto">{{this.montoTexto}}</span>
+                  <span class="estado estado-libre">{{this.porcentajeTexto}}</span>
+                </li>
+              {{/each}}
+            {{else}}
+              <li class="kpi-rango-item">
+                <span class="rango-nombre">Sin rangos activos</span>
+                <span class="rango-monto">N/D</span>
+                <span class="estado estado-reservada">0 %</span>
+              </li>
+            {{/if}}
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="seccion" style="padding-top:0;">
+      <div class="grid-tarjetas">
+        <article class="tarjeta">
+          <h3>Tipo de cambio</h3>
+          <p>Actualiza compra y venta del USD. Se usa en operaciones en dólares.</p>
+          <a class="btn" href="/configuracion/tipodecampo">Ir a tipo de cambio</a>
+        </article>
+        <article class="tarjeta">
+          <h3>Rangos de Comisión</h3>
+          <p>Configura montos mínimos/máximos y porcentaje aplicado a retiros.</p>
+          <a class="btn" href="/configuracion/rangoscomision">Ir a rangos</a>
+        </article>
+      </div>
+    </section>
+  </main>

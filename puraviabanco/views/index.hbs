@@ -1,0 +1,61 @@
+﻿<main class="contenedor">
+    <section class="hero">
+      <div class="hero-texto">
+        <h1>Administra clientes, cuentas y transacciones desde un solo panel</h1>
+        <p>Diseñado para equipos que necesitan manejo bancario.</p>
+        <div class="botones">
+          <a class="btn" href="/panel">Ir al dashboard</a>
+          <a class="btn btn-secundario" href="/clientes">Registrar cliente</a>
+        </div>
+      </div>
+      <div class="tarjeta">
+        <ul class="lista-simple" style="margin:0; padding:0; list-style:none;">
+          <li>Registrar cliente.</li>
+          <li>Crear cuentas.</li>
+          <li>Registrar transacciones.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="seccion">
+      <h2 class="titulo-seccion">Indicadores del banco</h2>
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="etiqueta">Clientes activos</div>
+          <div class="valor">{{clientesActivos}}</div>
+          <div class="estado estado-libre">Registros con estado Activo</div>
+        </div>
+        <div class="kpi">
+          <div class="etiqueta">Cuentas abiertas</div>
+          <div class="valor">{{cuentasAbiertas}}</div>
+          <div class="estado estado-libre">Registros con estado Activa</div>
+        </div>
+        <div class="kpi">
+          <div class="etiqueta">Transacciones del día</div>
+          <div class="valor">{{transaccionesDelDia}}</div>
+          <div class="estado estado-libre">Fecha actual del servidor</div>
+        </div>
+      </div>
+    </section>
+    <section class="seccion">
+      <div class="banner">
+        <div>
+          <h2>Control total con datos claros</h2>
+          <p>Consulta listas de clientes, cuentas y movimientos. Cada pantalla está pensada para operar rápido y con trazabilidad total.</p>
+          <div class="botones">
+            <a class="btn btn-secundario" href="/contacto">Solicitar soporte</a>
+          </div>
+        </div>
+        <div>
+          <div class="tarjeta">
+            <h3>Vista rápida</h3>
+            <p><strong>Cliente:</strong> 1-0456-1234  Activo</p>
+            <p><strong>Cuenta:</strong> CR05 0123 0000 4567 8901  CRC</p>
+            <p><strong>Última transacción:</strong> Depósito · ₡ 250 000 · 18/03/2026</p>
+            <p><strong>Saldo final:</strong> ₡ 1 540 000</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
