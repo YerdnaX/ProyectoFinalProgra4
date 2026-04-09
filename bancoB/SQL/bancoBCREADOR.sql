@@ -5,7 +5,7 @@ GO
 
 IF DB_ID(N'SistemaBancarioDB') IS NULL
 BEGIN
-    CREATE DATABASE SistemaBancarioDB;
+    CREATE DATABASE bancoB;
 END;
 GO
 
