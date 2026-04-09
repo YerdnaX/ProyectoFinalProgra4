@@ -4,20 +4,51 @@ async function FinalizarOrden() {
         alert('No hay orden activa para esta mesa')
         return
     }
-    if (!confirm('¿Marcar la orden como finalizada y liberar la mesa?')) return
+
+    const cuentaInput = document.getElementById('cuenta-bancaria')
+    const numeroCuenta = cuentaInput ? cuentaInput.value.trim() : ''
+
+    if (!numeroCuenta) {
+        alert('Ingrese el número de cuenta bancaria del cliente para procesar el pago.')
+        if (cuentaInput) cuentaInput.focus()
+        return
+    }
+
+    // Validación básica de formato IBAN (debe empezar con letras y tener al menos 10 chars)
+    var cuentaNorm = numeroCuenta.replace(/\s+/g, '').toUpperCase()
+    if (cuentaNorm.length < 10 || !/^[A-Z]{2}/.test(cuentaNorm)) {
+        alert('El número de cuenta no tiene un formato válido. Ejemplo: CR05 0123 0000 1234 5678 90')
+        if (cuentaInput) cuentaInput.focus()
+        return
+    }
+
+    const totalEl = document.getElementById('orden-total')
+    const totalTexto = totalEl ? totalEl.value : '0'
+    const totalNum = Number(totalTexto)
+
+    if (!confirm(`¿Cobrar ₡${totalNum.toLocaleString('es-CR')} a la cuenta ${numeroCuenta} y cerrar la orden?`)) return
 
     try {
-        const resp = await fetch(`/api/orden/${ordenId}/cerrar`, { method: 'POST' })
+        const resp = await fetch('/api/pago-bancario', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ordenId: ordenId,
+                numeroCuenta: cuentaNorm,
+                moneda: 'CRC',
+                descripcion: 'Pago factura orden #' + ordenId + ' - Restaurante PuraVia'
+            })
+        })
         const data = await resp.json()
         if (!resp.ok || data.error) {
-            alert(data.error || 'No se pudo cerrar la orden')
+            alert('No se pudo procesar el pago: ' + (data.error || 'Error desconocido'))
             return
         }
-        alert('Orden cerrada y mesa liberada')
+        alert('Pago realizado y orden cerrada correctamente.\nTotal cobrado: ₡' + (data.total || totalNum).toLocaleString('es-CR'))
         location.reload()
     } catch (err) {
         console.error(err)
-        alert('Error de red al cerrar la orden')
+        alert('Error de red al procesar el pago bancario')
     }
 }
 

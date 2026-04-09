@@ -1,0 +1,173 @@
+<main class="contenedor">
+  <section class="seccion">
+    <h1 class="titulo-seccion">Transferencias Interbancarias</h1>
+    <p class="subtitulo">Operaciones entre Banco Pura Vida y otros bancos a través del Banco Central.</p>
+  </section>
+
+  <!-- ======================================================
+       SECCIÓN A: Enviar dinero a otro banco por teléfono
+       ====================================================== -->
+  <section class="seccion">
+    <h2 class="titulo-seccion">Enviar dinero a otro banco</h2>
+    <p class="subtitulo">El Banco Central identifica al destinatario por su número telefónico y ejecuta la transferencia. Se aplica comisión según los rangos vigentes.</p>
+
+    <div class="grid-formularios">
+      <form class="formulario">
+        <h3>Datos de la transferencia</h3>
+
+        <div class="campo">
+          <label for="env-iban-origen">Cuenta origen (IBAN de Banco A)</label>
+          <input id="env-iban-origen" type="text" placeholder="CR__ ____ ____ ____ ____">
+        </div>
+        <div class="campo">
+          <label for="env-telefono-destino">Teléfono del destinatario</label>
+          <input id="env-telefono-destino" type="text" placeholder="8888-1234">
+        </div>
+        <div class="campo">
+          <label for="env-monto">Monto</label>
+          <input id="env-monto" type="number" step="0.01" min="0.01" placeholder="Mayor a cero">
+        </div>
+        <div class="campo">
+          <label for="env-moneda">Moneda</label>
+          <select id="env-moneda">
+            <option>CRC</option>
+            <option>USD</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="env-descripcion">Descripción</label>
+          <input id="env-descripcion" type="text" placeholder="Motivo de la transferencia">
+        </div>
+        <div class="botones">
+          <button class="btn" id="btn-enviar-por-telefono" type="button">Enviar dinero</button>
+          <button class="btn btn-secundario" type="reset">Limpiar</button>
+        </div>
+        <p class="subtitulo">El sistema buscará una cuenta del destinatario en la misma moneda.</p>
+      </form>
+
+      <div class="factura">
+        <h3>Información</h3>
+        <p>Esta operación:</p>
+        <ul style="margin: 0.5rem 0 0 1rem; line-height:1.8;">
+          <li>Ejecuta un retiro con comisión en su cuenta</li>
+          <li>Deposita el monto en la cuenta del destinatario</li>
+          <li>El Banco Central registra la operación en el historial interbancario</li>
+          <li>La cuenta origen debe estar registrada en el Banco Central</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion" id="resultado-envio" style="display:none;">
+    <h2 class="titulo-seccion">Resultado de la transferencia enviada</h2>
+    <div class="tabla-center">
+      <table class="tabla-resumen">
+        <thead>
+          <tr>
+            <th>Código operación</th>
+            <th>IBAN origen</th>
+            <th>Banco destino</th>
+            <th>IBAN destino</th>
+            <th>Monto</th>
+            <th>Moneda</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td id="env-res-codigo"></td>
+            <td id="env-res-iban-origen" class="nowrap"></td>
+            <td id="env-res-banco-destino"></td>
+            <td id="env-res-iban-destino" class="nowrap"></td>
+            <td id="env-res-monto"></td>
+            <td id="env-res-moneda"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ======================================================
+       SECCIÓN B: Traer dinero desde otro banco hacia Banco A
+       ====================================================== -->
+  <section class="seccion">
+    <h2 class="titulo-seccion">Traer dinero desde otro banco</h2>
+    <p class="subtitulo">Mueve fondos de una cuenta en Banco B o Banco C hacia una cuenta propia en Banco A. No genera comisión. Ambas cuentas deben pertenecer al mismo cliente y misma moneda.</p>
+
+    <div class="grid-formularios">
+      <form class="formulario">
+        <h3>Datos de la operación</h3>
+
+        <div class="campo">
+          <label for="traer-iban-origen">Cuenta origen (IBAN en Banco B o C)</label>
+          <input id="traer-iban-origen" type="text" placeholder="IBAN en el banco externo">
+        </div>
+        <div class="campo">
+          <label for="traer-iban-destino">Cuenta destino (IBAN en Banco A)</label>
+          <input id="traer-iban-destino" type="text" placeholder="IBAN de su cuenta en Banco Pura Vida">
+        </div>
+        <div class="campo">
+          <label for="traer-monto">Monto</label>
+          <input id="traer-monto" type="number" step="0.01" min="0.01" placeholder="Mayor a cero">
+        </div>
+        <div class="campo">
+          <label for="traer-moneda">Moneda</label>
+          <select id="traer-moneda">
+            <option>CRC</option>
+            <option>USD</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="traer-descripcion">Descripción</label>
+          <input id="traer-descripcion" type="text" placeholder="Motivo de la operación">
+        </div>
+        <div class="botones">
+          <button class="btn" id="btn-traer-desde-otro-banco" type="button">Traer fondos</button>
+          <button class="btn btn-secundario" type="reset">Limpiar</button>
+        </div>
+        <p class="subtitulo">Ambas cuentas deben pertenecer al mismo titular y misma moneda.</p>
+      </form>
+
+      <div class="factura">
+        <h3>Información</h3>
+        <p>Esta operación:</p>
+        <ul style="margin: 0.5rem 0 0 1rem; line-height:1.8;">
+          <li>No cobra comisión en el banco externo</li>
+          <li>Valida que ambas cuentas pertenezcan al mismo cliente</li>
+          <li>Valida que ambas cuentas estén en la misma moneda</li>
+          <li>El banco destino debe ser siempre Banco A (Pura Vida)</li>
+          <li>La operación queda registrada en el historial del Banco Central</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion" id="resultado-traer" style="display:none;">
+    <h2 class="titulo-seccion">Resultado de la operación de traída de fondos</h2>
+    <div class="tabla-center">
+      <table class="tabla-resumen">
+        <thead>
+          <tr>
+            <th>Código operación</th>
+            <th>Banco origen</th>
+            <th>IBAN origen</th>
+            <th>IBAN destino (Banco A)</th>
+            <th>Monto</th>
+            <th>Moneda</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td id="traer-res-codigo"></td>
+            <td id="traer-res-banco-origen"></td>
+            <td id="traer-res-iban-origen" class="nowrap"></td>
+            <td id="traer-res-iban-destino" class="nowrap"></td>
+            <td id="traer-res-monto"></td>
+            <td id="traer-res-moneda"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+<script src="/javascripts/interbancario-logica.js"></script>

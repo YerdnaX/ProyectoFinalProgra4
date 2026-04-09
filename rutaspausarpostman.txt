@@ -1,0 +1,255 @@
+
+BANCO B (PUERTO 3003)
+=====================
+Base URL: http://localhost:3003/api
+
+1 ---- GET /status
+GET http://localhost:3003/api/status
+
+2 ---- GET /clientes
+GET http://localhost:3003/api/clientes
+
+3 ---- GET /clientes/:id
+GET http://localhost:3003/api/clientes/1-0456-1234
+
+4 ---- GET /cuentas
+GET http://localhost:3003/api/cuentas
+
+5 ---- GET /cuentas/:iban
+GET http://localhost:3003/api/cuentas/CR0501230000B5678901
+
+6 ---- GET /cuentas/por-cliente/:clienteId
+GET http://localhost:3003/api/cuentas/por-cliente/1-0456-1234
+
+7 ---- POST /cuentas/crear
+POST http://localhost:3003/api/cuentas/crear \
+  -H "Content-Type: application/json" \
+  -d "{\"iban\":\"CR6600000000B1010101\",\"aliasCuenta\":\"Cuenta prueba Postman B\",\"moneda\":\"CRC\",\"saldoActual\":15000,\"identificadorCliente\":\"P-99332211\"}"
+
+8 ---- POST /transacciones/deposito
+POST http://localhost:3003/api/transacciones/deposito \
+  -H "Content-Type: application/json" \
+  -d "{\"iban\":\"CR0501230000B5678901\",\"monto\":25000,\"moneda\":\"CRC\",\"descripcion\":\"Deposito de prueba Postman B\"}"
+
+9 ---- POST /transacciones/retiro
+POST http://localhost:3003/api/transacciones/retiro \
+  -H "Content-Type: application/json" \
+  -d "{\"iban\":\"CR0501230000B5678901\",\"monto\":5000,\"moneda\":\"CRC\",\"descripcion\":\"Retiro de prueba Postman B\"}"
+
+10 ---- GET /transacciones/por-cuenta/:iban
+GET http://localhost:3003/api/transacciones/por-cuenta/CR0501230000B5678901
+
+
+BANCO C (PUERTO 3004)
+=====================
+Base URL: http://localhost:3004/api
+
+1 ---- GET /status
+GET http://localhost:3004/api/status
+
+2 ---- GET /clientes
+GET http://localhost:3004/api/clientes
+
+3 ---- GET /clientes/:id
+GET http://localhost:3004/api/clientes/5-5555-0001
+
+4 ---- GET /cuentas
+GET http://localhost:3004/api/cuentas
+
+5 ---- GET /cuentas/:iban
+GET http://localhost:3004/api/cuentas/CR9900110022C3344550
+
+6 ---- GET /cuentas/por-cliente/:clienteId
+GET http://localhost:3004/api/cuentas/por-cliente/5-5555-0001
+
+7 ---- POST /cuentas/crear
+POST http://localhost:3004/api/cuentas/crear \
+  -H "Content-Type: application/json" \
+  -d "{\"iban\":\"CR6600000000C1010101\",\"aliasCuenta\":\"Cuenta prueba Postman C\",\"moneda\":\"CRC\",\"saldoActual\":20000,\"identificadorCliente\":\"5-5555-0001\"}"
+
+8 ---- POST /transacciones/deposito
+POST http://localhost:3004/api/transacciones/deposito \
+  -H "Content-Type: application/json" \
+  -d "{\"iban\":\"CR9900110022C3344550\",\"monto\":30000,\"moneda\":\"CRC\",\"descripcion\":\"Deposito de prueba Postman C\"}"
+
+9 ---- POST /transacciones/retiro
+POST http://localhost:3004/api/transacciones/retiro \
+  -H "Content-Type: application/json" \
+  -d "{\"iban\":\"CR9900110022C3344550\",\"monto\":4000,\"moneda\":\"CRC\",\"descripcion\":\"Retiro de prueba Postman C\"}"
+
+10 ---- GET /transacciones/por-cuenta/:iban
+GET http://localhost:3004/api/transacciones/por-cuenta/CR9900110022C3344550
+
+
+BANCO CENTRAL (PUERTO 3002)
+===========================
+Base URL: http://localhost:3002/api
+
+1 ---- GET /status
+GET http://localhost:3002/api/status
+
+2 ---- GET /bancos
+GET http://localhost:3002/api/bancos
+
+3 ---- GET /clientes
+GET http://localhost:3002/api/clientes
+
+4 ---- GET /cuentas
+GET http://localhost:3002/api/cuentas
+
+5 ---- GET /enrutamiento/por-telefono/:telefono
+GET http://localhost:3002/api/enrutamiento/por-telefono/8822-4411
+
+6 ---- GET /enrutamiento/por-cuenta/:iban
+GET http://localhost:3002/api/enrutamiento/por-cuenta/CR440044004400440044
+
+7 ---- POST /enrutamiento/registrar
+POST http://localhost:3002/api/enrutamiento/registrar \
+  -H "Content-Type: application/json" \
+  -d "{\"identificadorCliente\":\"4-0000-2222\",\"telefono\":\"8511-2211\",\"iban\":\"CR0011223344B5566778\",\"codigoBanco\":\"B\",\"moneda\":\"CRC\"}"
+
+8 ---- GET /historial
+GET http://localhost:3002/api/historial?limite=10&banco=A&resultado=Exitosa
+
+9 ---- POST /transferencia/por-telefono
+POST http://localhost:3002/api/transferencia/por-telefono \
+  -H "Content-Type: application/json" \
+  -d "{\"ibanOrigen\":\"CR0501230000B5678901\",\"telefonoDestino\":\"8500-3311\",\"monto\":1000,\"moneda\":\"CRC\",\"descripcion\":\"Transferencia test por telefono\"}"
+
+10 ---- POST /transferencia/por-cuenta
+POST http://localhost:3002/api/transferencia/por-cuenta \
+  -H "Content-Type: application/json" \
+  -d "{\"ibanOrigen\":\"CR0501230000B5678901\",\"ibanDestino\":\"CR050123000045678901\",\"monto\":1000,\"moneda\":\"CRC\",\"descripcion\":\"Transferencia test por cuenta a banco A\"}"
+
+11 ---- POST /pago-restaurante
+POST http://localhost:3002/api/pago-restaurante \
+  -H "Content-Type: application/json" \
+  -d "{\"numeroCuenta\":\"CR440044004400440044\",\"monto\":8136,\"moneda\":\"CRC\",\"descripcion\":\"Pago factura test restaurante\"}"
+
+
+PURAVIABANCO / BANCO A (PUERTO 3001)
+=====================================
+Base URL: http://localhost:3001/api
+
+1 ---- POST /configuracion/tipo-cambio
+POST http://localhost:3001/api/configuracion/tipo-cambio \
+  -H "Content-Type: application/json" \
+  -d "{\"compra\":523.5,\"venta\":535.25,\"registradoPor\":\"PostmanQA\"}"
+
+2 ---- GET /configuracion/rangos-comision
+GET http://localhost:3001/api/configuracion/rangos-comision
+
+3 ---- POST /configuracion/rangos-comision
+POST http://localhost:3001/api/configuracion/rangos-comision \
+  -H "Content-Type: application/json" \
+  -d "{\"rangos\":[{\"montoMinimo\":0,\"montoMaximo\":100000,\"porcentajeComision\":1.5},{\"montoMinimo\":100001,\"montoMaximo\":500000,\"porcentajeComision\":3},{\"montoMinimo\":500001,\"montoMaximo\":2000000,\"porcentajeComision\":4.5}]}"
+
+4 ---- POST /clientes/guardar-actualizar
+POST http://localhost:3001/api/clientes/guardar-actualizar \
+  -H "Content-Type: application/json" \
+  -d "{\"identificadorCliente\":\"8-8888-8888\",\"nombreCompleto\":\"Cliente Postman Temporal\",\"correoElectronico\":\"cliente.postman@bpv.cr\",\"telefono\":\"8999-0011\",\"fechaNacimiento\":\"1999-01-01\",\"ocupacion\":\"Tester\",\"direccion\":\"San Jose\",\"estado\":\"Activo\"}"
+
+5 ---- POST /clientes/eliminar
+POST http://localhost:3001/api/clientes/eliminar \
+  -H "Content-Type: application/json" \
+  -d "{\"identificadorCliente\":\"8-8888-8888\"}"
+
+6 ---- POST /cuentas/guardar-actualizar
+POST http://localhost:3001/api/cuentas/guardar-actualizar \
+  -H "Content-Type: application/json" \
+  -d "{\"iban\":\"CR556677889900112233\",\"aliasCuenta\":\"Cuenta temporal postman\",\"moneda\":\"CRC\",\"saldoActual\":50000,\"clientePropietario\":\"4-7890-1234\",\"estado\":\"Activa\"}"
+
+7 ---- POST /cuentas/eliminar
+POST http://localhost:3001/api/cuentas/eliminar \
+  -H "Content-Type: application/json" \
+  -d "{\"iban\":\"CR556677889900112233\"}"
+
+8 ---- POST /transacciones/deposito
+POST http://localhost:3001/api/transacciones/deposito \
+  -H "Content-Type: application/json" \
+  -d "{\"cuentaDeposito\":\"CR440044004400440044\",\"descripcion\":\"Deposito prueba postman\",\"monto\":12000,\"moneda\":\"CRC\"}"
+
+9 ---- POST /transacciones/retiro
+POST http://localhost:3001/api/transacciones/retiro \
+  -H "Content-Type: application/json" \
+  -d "{\"cuentaRetiro\":\"CR440044004400440044\",\"descripcion\":\"Retiro prueba postman\",\"monto\":3000,\"moneda\":\"CRC\"}"
+
+10 ---- POST /prestamos/solicitar
+POST http://localhost:3001/api/prestamos/solicitar \
+  -H "Content-Type: application/json" \
+  -d "{\"identificadorCliente\":\"4-7890-1234\",\"montoPrestamo\":900000,\"plazoMeses\":9}"
+
+
+PURAVIA RESTAURANTE (PUERTO 3000)
+==================================
+Base URL: http://localhost:3000/api
+
+1 ---- POST /contacto
+POST http://localhost:3000/api/contacto \
+  -H "Content-Type: application/json" \
+  -d "{\"nombre\":\"Cliente Prueba\",\"correo\":\"cliente@correo.com\",\"telefono\":\"8888-1212\",\"asunto\":\"Consulta menu\",\"mensaje\":\"Quiero reservar para 4 personas\"}"
+
+2 ---- POST /insertarusuario
+POST http://localhost:3000/api/insertarusuario \
+  -H "Content-Type: application/json" \
+  -d "{\"nombre\":\"Usuario Postman\",\"correo\":\"u.postman@puravia.cr\",\"usuario\":\"postman_user_01\",\"password\":\"123456\",\"rol\":\"admin\",\"estado\":\"Activo\",\"notas\":\"Creado desde Postman\"}"
+
+3 ---- PUT /usuario/:id
+(Use un id existente, por ejemplo el creado en el paso 2 ----)
+PUT http://localhost:3000/api/usuario/5 \
+  -H "Content-Type: application/json" \
+  -d "{\"nombre\":\"Usuario Postman Editado\",\"correo\":\"u.postman@puravia.cr\",\"usuario\":\"postman_user_01\",\"password\":\"123456\",\"estado\":\"Activo\",\"notas\":\"Actualizado\",\"rol\":\"admin\"}"
+
+4 ---- DELETE /usuario/:id
+DELETE http://localhost:3000/api/usuario/5
+
+5 ---- POST /insertarmesero
+POST http://localhost:3000/api/insertarmesero \
+  -H "Content-Type: application/json" \
+  -d "{\"nombre\":\"Mesero Postman\",\"identificacion\":\"6-1111-2222\",\"telefono\":\"8888-3333\",\"correo\":\"mesero.postman@puravia.cr\",\"turno\":\"Tarde\",\"usuario\":\"mesero_postman_01\",\"password\":\"123456\",\"observaciones\":\"Creado para pruebas\"}"
+
+6 ---- PUT /mesero/:id?usuarioId=:usuarioId
+(Ejemplo usando datos de prueba cargados: mesero 4 y usuario 6)
+PUT http://localhost:3000/api/mesero/4?usuarioId=6 \
+  -H "Content-Type: application/json" \
+  -d "{\"nombre\":\"Mariela Campos Actualizada\",\"identificacion\":\"4-5678-9012\",\"telefono\":\"8787-0010\",\"correo\":\"mariela@puravia.cr\",\"turno\":\"Noche\",\"usuario\":\"mcampos\",\"password\":\"123456\",\"observaciones\":\"Actualizacion Postman\"}"
+
+7 ---- DELETE /mesero/:id?usuarioId=:usuarioId
+(Ejemplo usando datos de prueba cargados: mesero 5 y usuario 7)
+DELETE http://localhost:3000/api/mesero/5?usuarioId=7
+
+8 ---- POST /orden/:id/agregar
+(El id de orden de seed suele ser 1)
+POST http://localhost:3000/api/orden/1/agregar \
+  -H "Content-Type: application/json" \
+  -d "{\"productoId\":6,\"cantidad\":1,\"observaciones\":\"Sin azucar\"}"
+
+9 ---- POST /orden/:id/cerrar
+POST http://localhost:3000/api/orden/1/cerrar
+
+10 ---- POST /reserva
+POST http://localhost:3000/api/reserva \
+  -H "Content-Type: application/json" \
+  -d "{\"mesa\":14,\"nombre\":\"Reserva Postman\",\"telefono\":\"8888-4444\",\"fecha\":\"2026-04-15\",\"hora\":\"19:00\",\"notas\":\"Mesa tranquila\",\"cantidad_personas\":4}"
+
+11 ---- GET /reserva?mesa=:mesa&fecha=:fecha
+GET http://localhost:3000/api/reserva?mesa=14&fecha=2026-04-15
+
+12 ---- PUT /reserva/:id/estado
+(Use un id de reserva obtenido en 11 ----)
+PUT http://localhost:3000/api/reserva/1/estado \
+  -H "Content-Type: application/json" \
+  -d "{\"estado\":\"confirmada\"}"
+
+13 ---- DELETE /reserva/:id
+DELETE http://localhost:3000/api/reserva/1
+
+14 ---- POST /orden/:id/imprimir
+POST http://localhost:3000/api/orden/1/imprimir
+
+15 ---- POST /pago-bancario
+POST http://localhost:3000/api/pago-bancario \
+  -H "Content-Type: application/json" \
+  -d "{\"ordenId\":1,\"numeroCuenta\":\"CR440044004400440044\",\"moneda\":\"CRC\",\"descripcion\":\"Pago factura orden #1 - prueba postman\"}"
+
+

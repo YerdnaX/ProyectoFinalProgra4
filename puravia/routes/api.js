@@ -5,6 +5,9 @@ var sql = database.sql
 var crypto = require('crypto')
 var fs = require('fs')
 var path = require('path')
+var axios = require('axios')
+
+var BANCO_CENTRAL_URL = 'http://localhost:3002'
 
 // Helper simple para hash de contrasena (sha256)
 function hashPassword(plain) {
@@ -666,6 +669,97 @@ router.post('/orden/:id/imprimir', async function (req, res, next) {
     } catch (err) {
         console.error('Error al generar factura:', err)
         res.status(500).json({ error: 'Error al generar factura' })
+    }
+})
+
+// ============================================================
+// Pago bancario al finalizar una orden (req #20)
+// El restaurante solicita el cobro al Banco Central.
+// Si el cobro es exitoso, la orden se cierra.
+// Body: { ordenId, numeroCuenta, moneda?, descripcion? }
+// ============================================================
+
+router.post('/pago-bancario', async function (req, res, next) {
+    const ordenId = parseInt(req.body.ordenId, 10)
+    const numeroCuenta = String(req.body.numeroCuenta || '').trim().toUpperCase()
+    const moneda = req.body.moneda === 'USD' ? 'USD' : 'CRC'
+
+    if (!ordenId) {
+        return res.status(400).json({ error: 'Id de orden inválido' })
+    }
+    if (!numeroCuenta) {
+        return res.status(400).json({ error: 'Número de cuenta bancaria obligatorio' })
+    }
+
+    const pool = await database.poolPromise
+
+    // 1. Obtener la orden y calcular el total
+    const ordRs = await pool.request()
+        .input('ordenId', sql.Int, ordenId)
+        .query(`SELECT o.id, o.mesa_id, o.estado FROM orden o WHERE o.id = @ordenId AND o.estado = 'abierta'`)
+
+    if (!ordRs.recordset.length) {
+        return res.status(404).json({ error: 'Orden no encontrada o ya cerrada' })
+    }
+
+    const mesaId = ordRs.recordset[0].mesa_id
+
+    const totRs = await pool.request()
+        .input('ordenId', sql.Int, ordenId)
+        .query(`SELECT SUM(subtotal) AS subtotal FROM orden_detalle WHERE orden_id = @ordenId`)
+    const subtotal = Number(totRs.recordset[0].subtotal || 0)
+    const impuesto = Number((subtotal * 0.13).toFixed(2))
+    const total = Number((subtotal + impuesto).toFixed(2))
+
+    if (total <= 0) {
+        return res.status(400).json({ error: 'La orden no tiene items para cobrar' })
+    }
+
+    // 2. Llamar al Banco Central para ejecutar el cobro
+    try {
+        var respBC = await axios.post(
+            BANCO_CENTRAL_URL + '/api/pago-restaurante',
+            {
+                numeroCuenta: numeroCuenta,
+                monto: total,
+                moneda: moneda,
+                descripcion: req.body.descripcion || ('Pago factura orden #' + ordenId + ' - Restaurante PuraVia')
+            },
+            { timeout: 15000 }
+        )
+
+        if (!respBC.data.ok) {
+            return res.status(402).json({ error: respBC.data.message || 'El cobro bancario fue rechazado' })
+        }
+    } catch (errBC) {
+        var dataErr = (errBC.response && errBC.response.data) ? errBC.response.data : {}
+        var msgErr = dataErr.message || errBC.message || 'Error al conectar con el Banco Central'
+        return res.status(502).json({ error: msgErr })
+    }
+
+    // 3. Cobro exitoso: cerrar la orden y liberar la mesa
+    const transaction = new sql.Transaction(pool)
+    await transaction.begin()
+    try {
+        await new sql.Request(transaction)
+            .input('total', sql.Decimal(12, 2), total)
+            .input('ordenId', sql.Int, ordenId)
+            .query(`UPDATE orden
+                    SET estado = 'cerrada',
+                        total = @total,
+                        cerrada_en = SYSDATETIME()
+                    WHERE id = @ordenId`)
+
+        await new sql.Request(transaction)
+            .input('mesaId', sql.Int, mesaId)
+            .query(`UPDATE mesa SET estado = 'libre' WHERE id = @mesaId`)
+
+        await transaction.commit()
+        res.json({ ok: true, subtotal, impuesto, total, message: 'Pago realizado y orden cerrada correctamente' })
+    } catch (errDb) {
+        await transaction.rollback()
+        console.error('Error al cerrar orden tras pago bancario:', errDb)
+        res.status(500).json({ error: 'El cobro bancario fue exitoso pero hubo un error al cerrar la orden. Contacte soporte.' })
     }
 })
 

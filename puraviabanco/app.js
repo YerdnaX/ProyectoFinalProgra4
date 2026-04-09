@@ -14,6 +14,7 @@ var configuracionRouter = require('./routes/configuracion');
 var contactoRouter = require('./routes/contacto');
 var APIRouter = require('./routes/api');
 var prestamosRouter = require('./routes/prestamos');
+var interbancarioRouter = require('./routes/interbancario');
 
 var app = express();
 
@@ -37,6 +38,7 @@ app.use('/configuracion', configuracionRouter);
 app.use('/contacto', contactoRouter);
 app.use('/api', APIRouter);
 app.use('/prestamos', prestamosRouter);
+app.use('/interbancario', interbancarioRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

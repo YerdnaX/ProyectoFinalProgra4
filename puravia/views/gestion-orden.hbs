@@ -86,8 +86,13 @@
         <p><strong>Mesa:</strong> {{#if mesa}}Mesa {{mesa}}{{else}}No especificada{{/if}}</p>
         <p><strong>Productos:</strong> {{#if detalles.length}}{{detalles.length}} ítems{{else}}Sin productos{{/if}}</p>
         <p><strong>Total:</strong> ₡{{total}}</p>
+        <div class="campo" style="margin-top:1rem;">
+          <label for="cuenta-bancaria">Cuenta bancaria (IBAN)</label>
+          <input id="cuenta-bancaria" type="text" placeholder="CRxx xxxx xxxx xxxx xxxx" {{#unless orden}}disabled{{/unless}}>
+          <p class="subtitulo" style="margin-top:0.3rem;">Ingrese la cuenta del cliente para cobrar el total.</p>
+        </div>
         <div class="botones">
-          <button class="btn" type="button" onclick="FinalizarOrden()" {{#unless orden}}disabled{{/unless}}>Orden finalizada</button>
+          <button class="btn" type="button" onclick="FinalizarOrden()" {{#unless orden}}disabled{{/unless}}>Finalizar y cobrar</button>
           <button class="btn btn-secundario" type="button" onclick="ImprimirFactura()" {{#unless orden}}disabled{{/unless}}>Imprimir factura</button>
         </div>
       </div>
@@ -97,6 +102,7 @@
     </div>
 
     <input type="hidden" id="orden-id" value="{{#if orden}}{{orden.id}}{{/if}}">
+    <input type="hidden" id="orden-total" value="{{total}}">
   </section>
 </main>
 
