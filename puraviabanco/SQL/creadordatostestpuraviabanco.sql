@@ -16,6 +16,19 @@ SET QUOTED_IDENTIFIER ON;
 GO
 
 /* ----------------------------------------------------------
+   Limpieza de datos de prueba previos
+   ---------------------------------------------------------- */
+DELETE FROM dbo.TRANSACCION_RETIRO;
+DELETE FROM dbo.TRANSACCION;
+DELETE FROM dbo.SOLICITUD_PRESTAMO;
+DELETE FROM dbo.CUENTA_BANCARIA;
+DELETE FROM dbo.CONTACTO_SOPORTE;
+DELETE FROM dbo.RANGO_COMISION_RETIRO;
+DELETE FROM dbo.TIPO_CAMBIO;
+DELETE FROM dbo.CLIENTE;
+GO
+
+/* ----------------------------------------------------------
    Clientes adicionales para pruebas de paneles y CRUD
    ---------------------------------------------------------- */
 IF NOT EXISTS (

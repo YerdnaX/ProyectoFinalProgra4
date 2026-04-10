@@ -16,6 +16,15 @@ SET QUOTED_IDENTIFIER ON;
 GO
 
 /* ----------------------------------------------------------
+   Limpieza de datos de prueba previos
+   ---------------------------------------------------------- */
+DELETE FROM dbo.HISTORIAL_INTERBANCARIO;
+GO
+
+DELETE FROM dbo.ENRUTAMIENTO;
+GO
+
+/* ----------------------------------------------------------
    Enrutamiento adicional de prueba
    Agrega cuentas que existen en los datos de bancos A/B/C.
    ---------------------------------------------------------- */
@@ -151,6 +160,103 @@ BEGIN
         'CR8800880088C9990003',
         'C',
         'CRC',
+        1,
+        SYSDATETIME()
+    );
+END;
+GO
+
+/* ----------------------------------------------------------
+   Enrutamiento de cuentas de Valeria (4-7890-1234) en Banco B y Banco C
+   Corresponde a las cuentas creadas en creadordatostestbancoB.sql y bancoC.sql
+   Permite probar el flujo completo de "traer fondos" B->A y C->A para Valeria
+   ---------------------------------------------------------- */
+IF NOT EXISTS (SELECT 1 FROM dbo.ENRUTAMIENTO WHERE iban = 'CR4400440044B0440044')
+BEGIN
+    INSERT INTO dbo.ENRUTAMIENTO (
+        identificador_cliente,
+        telefono,
+        iban,
+        codigo_banco,
+        moneda,
+        activo,
+        fecha_registro
+    )
+    VALUES (
+        '4-7890-1234',
+        '8822-4411',
+        'CR4400440044B0440044',
+        'B',
+        'CRC',
+        1,
+        SYSDATETIME()
+    );
+END;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM dbo.ENRUTAMIENTO WHERE iban = 'CR4400440044B0440055')
+BEGIN
+    INSERT INTO dbo.ENRUTAMIENTO (
+        identificador_cliente,
+        telefono,
+        iban,
+        codigo_banco,
+        moneda,
+        activo,
+        fecha_registro
+    )
+    VALUES (
+        '4-7890-1234',
+        '8822-4411',
+        'CR4400440044B0440055',
+        'B',
+        'USD',
+        1,
+        SYSDATETIME()
+    );
+END;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM dbo.ENRUTAMIENTO WHERE iban = 'CR4400440044C0440044')
+BEGIN
+    INSERT INTO dbo.ENRUTAMIENTO (
+        identificador_cliente,
+        telefono,
+        iban,
+        codigo_banco,
+        moneda,
+        activo,
+        fecha_registro
+    )
+    VALUES (
+        '4-7890-1234',
+        '8822-4411',
+        'CR4400440044C0440044',
+        'C',
+        'CRC',
+        1,
+        SYSDATETIME()
+    );
+END;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM dbo.ENRUTAMIENTO WHERE iban = 'CR4400440044C0440055')
+BEGIN
+    INSERT INTO dbo.ENRUTAMIENTO (
+        identificador_cliente,
+        telefono,
+        iban,
+        codigo_banco,
+        moneda,
+        activo,
+        fecha_registro
+    )
+    VALUES (
+        '4-7890-1234',
+        '8822-4411',
+        'CR4400440044C0440055',
+        'C',
+        'USD',
         1,
         SYSDATETIME()
     );

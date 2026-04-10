@@ -16,6 +16,19 @@ SET QUOTED_IDENTIFIER ON;
 GO
 
 /* ----------------------------------------------------------
+   Limpieza de datos de prueba previos
+   ---------------------------------------------------------- */
+DELETE FROM dbo.orden_detalle;
+DELETE FROM dbo.reserva;
+DELETE FROM dbo.orden;
+DELETE FROM dbo.mesero;
+DELETE FROM dbo.contacto;
+DELETE FROM dbo.mesa;
+DELETE FROM dbo.producto;
+DELETE FROM dbo.usuario;
+GO
+
+/* ----------------------------------------------------------
    Usuarios de prueba para panel admin
    ---------------------------------------------------------- */
 IF NOT EXISTS (SELECT 1 FROM dbo.usuario WHERE username = 'soporte1')

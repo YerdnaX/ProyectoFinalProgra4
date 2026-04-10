@@ -1,6 +1,9 @@
 var express = require('express');
 var router = express.Router();
 var database = require('./database');
+var axios = require('axios');
+
+var BANCO_CENTRAL_URL = 'http://localhost:3002';
 
 function normalizarTexto(valor) {
   return String(valor || '').trim();
@@ -16,7 +19,7 @@ function redondearDosDecimales(valor) {
 
 /* ----------------------------------------------------------
    GET /api/status
-   Health check del servicio
+   Salud del servicio
    ---------------------------------------------------------- */
 router.get('/status', function (req, res) {
   return res.json({ ok: true, banco: 'B', mensaje: 'Banco B operativo' });
@@ -76,6 +79,80 @@ router.get('/clientes', async function (req, res) {
     return res.json({ ok: true, data: data });
   } catch (error) {
     return res.status(500).json({ ok: false, reason: 'INTERNAL_ERROR', message: 'Error consultando clientes.' });
+  }
+});
+
+/* ----------------------------------------------------------
+   POST /api/clientes/crear
+   Crea un cliente en Banco B (usado para replicacion desde Banco A).
+   si el cliente ya existe retorna ok sin error.
+   ---------------------------------------------------------- */
+router.post('/clientes/crear', async function (req, res) {
+  try {
+    const pool = await database.poolPromise;
+    const id = normalizarTexto(req.body.identificadorCliente);
+    const nombre = normalizarTexto(req.body.nombreCompleto);
+    const correo = normalizarTexto(req.body.correoElectronico);
+    const telefono = normalizarTexto(req.body.telefono);
+    const fechaNacimientoTexto = normalizarTexto(req.body.fechaNacimiento);
+    const ocupacion = normalizarTexto(req.body.ocupacion);
+    const direccion = normalizarTexto(req.body.direccion);
+    const estado = normalizarTexto(req.body.estado) === 'Inactivo' ? 'Inactivo' : 'Activo';
+
+    if (!id || !nombre || !correo || !telefono || !fechaNacimientoTexto || !ocupacion || !direccion) {
+      return res.status(400).json({
+        ok: false,
+        reason: 'INVALID_INPUT',
+        message: 'Todos los campos del cliente son obligatorios.'
+      });
+    }
+
+    const fechaNacimiento = new Date(fechaNacimientoTexto);
+    if (Number.isNaN(fechaNacimiento.getTime())) {
+      return res.status(400).json({
+        ok: false,
+        reason: 'INVALID_DATE',
+        message: 'Fecha de nacimiento no valida.'
+      });
+    }
+
+    // Verificar si el cliente ya existe (idempotente)
+    const existeResult = await pool
+      .request()
+      .input('id', database.sql.VarChar(20), id)
+      .query(`SELECT COUNT(*) AS total FROM dbo.CLIENTE WHERE identificador_cliente = @id;`);
+
+    if (Number(existeResult.recordset[0].total) > 0) {
+      return res.json({ ok: true, action: 'exists', message: 'El cliente ya existe en Banco B.' });
+    }
+
+    await pool
+      .request()
+      .input('id', database.sql.VarChar(20), id)
+      .input('nombre', database.sql.NVarChar(150), nombre)
+      .input('correo', database.sql.NVarChar(120), correo)
+      .input('telefono', database.sql.VarChar(20), telefono)
+      .input('fechaNacimiento', database.sql.Date, fechaNacimiento)
+      .input('ocupacion', database.sql.NVarChar(100), ocupacion)
+      .input('direccion', database.sql.NVarChar(250), direccion)
+      .input('estado', database.sql.VarChar(10), estado)
+      .query(`
+        INSERT INTO dbo.CLIENTE (
+          identificador_cliente, nombre_completo, correo_electronico, telefono,
+          fecha_nacimiento, ocupacion, direccion, fecha_creacion, estado
+        ) VALUES (
+          @id, @nombre, @correo, @telefono,
+          @fechaNacimiento, @ocupacion, @direccion, SYSDATETIME(), @estado
+        );
+      `);
+
+    return res.json({ ok: true, action: 'created', message: 'Cliente creado en Banco B.' });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      reason: 'INTERNAL_ERROR',
+      message: 'Error creando cliente en Banco B.'
+    });
   }
 });
 
@@ -227,7 +304,6 @@ router.get('/cuentas/por-cliente/:clienteId', async function (req, res) {
 /* ----------------------------------------------------------
    POST /api/cuentas/crear
    Crea una nueva cuenta bancaria (para creacion distribuida)
-   Body: { iban, aliasCuenta, moneda, saldoActual, identificadorCliente }
    ---------------------------------------------------------- */
 router.post('/cuentas/crear', async function (req, res) {
   try {
@@ -300,6 +376,26 @@ router.post('/cuentas/crear', async function (req, res) {
         );
       `);
 
+    // Registrar en Banco Central (enrutamiento) para operaciones interbancarias (req#15)
+    try {
+      const telefonoResult = await pool
+        .request()
+        .input('clienteId', database.sql.VarChar(20), identificadorCliente)
+        .query(`SELECT telefono FROM dbo.CLIENTE WHERE identificador_cliente = @clienteId;`);
+
+      const telefono = (telefonoResult.recordset[0] || {}).telefono || '';
+
+      await axios.post(BANCO_CENTRAL_URL + '/api/enrutamiento/registrar', {
+        identificadorCliente: identificadorCliente,
+        telefono: telefono,
+        iban: iban,
+        codigoBanco: 'B',
+        moneda: moneda
+      }, { timeout: 5000 });
+    } catch (errCentral) {
+      console.warn('Banco B: No se pudo registrar en Banco Central:', errCentral.message);
+    }
+
     return res.json({ ok: true, message: 'Cuenta creada correctamente en Banco B.', iban: iban });
   } catch (error) {
     return res.status(500).json({ ok: false, reason: 'INTERNAL_ERROR', message: 'Error creando cuenta.' });
@@ -309,7 +405,6 @@ router.post('/cuentas/crear', async function (req, res) {
 /* ----------------------------------------------------------
    POST /api/transacciones/deposito
    Registra un deposito en una cuenta
-   Body: { iban, monto, moneda, descripcion }
    ---------------------------------------------------------- */
 router.post('/transacciones/deposito', async function (req, res) {
   try {
@@ -446,8 +541,6 @@ router.post('/transacciones/deposito', async function (req, res) {
 /* ----------------------------------------------------------
    POST /api/transacciones/retiro
    Registra un retiro con o sin comision.
-   Body: { iban, monto, moneda, descripcion, sinComision? }
-   sinComision = true se usa para transferencias req#17 (sin comision)
    ---------------------------------------------------------- */
 router.post('/transacciones/retiro', async function (req, res) {
   try {

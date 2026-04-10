@@ -1,6 +1,9 @@
 ﻿var express = require('express');
 var router = express.Router();
 var database = require('./database');
+var axios = require('axios');
+
+var BANCO_CENTRAL_URL = 'http://localhost:3002';
 
 function normalizarTexto(valor) {
   return String(valor || '').trim();
@@ -405,6 +408,28 @@ router.post('/clientes/guardar-actualizar', async function (req, res) {
       );
     `);
 
+    // Replicar cliente a Banco B y Banco C (best-effort, no bloquea la respuesta)
+    var datosReplicacionCliente = {
+      identificadorCliente: identificadorCliente,
+      nombreCompleto: nombreCompleto,
+      correoElectronico: correoElectronico,
+      telefono: telefono,
+      fechaNacimiento: fechaNacimientoTexto,
+      ocupacion: ocupacion,
+      direccion: direccion,
+      estado: estado
+    };
+    try {
+      await axios.post('http://localhost:3003/api/clientes/crear', datosReplicacionCliente, { timeout: 5000 });
+    } catch (errRepB) {
+      console.warn('Banco A: No se pudo replicar cliente a Banco B:', errRepB.message);
+    }
+    try {
+      await axios.post('http://localhost:3004/api/clientes/crear', datosReplicacionCliente, { timeout: 5000 });
+    } catch (errRepC) {
+      console.warn('Banco A: No se pudo replicar cliente a Banco C:', errRepC.message);
+    }
+
     return res.json({
       ok: true,
       action: 'created',
@@ -630,6 +655,95 @@ router.post('/cuentas/guardar-actualizar', async function (req, res) {
         @estado
       );
     `);
+
+    // Registrar en Banco Central y replicar cuenta a Banco B y Banco C (best-effort)
+    try {
+      const clienteDatosResult = await pool
+        .request()
+        .input('clienteId', database.sql.VarChar(20), identificadorCliente)
+        .query(`
+          SELECT telefono, nombre_completo, correo_electronico,
+                 fecha_nacimiento, ocupacion, direccion, estado
+          FROM dbo.CLIENTE
+          WHERE identificador_cliente = @clienteId;
+        `);
+
+      const clienteDatos = clienteDatosResult.recordset[0] || {};
+      const telefono = clienteDatos.telefono || '';
+
+      // Registrar cuenta de Banco A en Banco Central
+      await axios.post(BANCO_CENTRAL_URL + '/api/enrutamiento/registrar', {
+        identificadorCliente: identificadorCliente,
+        telefono: telefono,
+        iban: iban,
+        codigoBanco: 'A',
+        moneda: moneda
+      }, { timeout: 5000 });
+
+      // Derivar IBANs para Banco B y Banco C segun patron: pos 12 = codigo banco
+      if (iban.length >= 13) {
+        var ibanB = iban.substring(0, 12) + 'B' + iban.substring(13);
+        var ibanC = iban.substring(0, 12) + 'C' + iban.substring(13);
+
+        var datosCliente = {
+          identificadorCliente: identificadorCliente,
+          nombreCompleto: clienteDatos.nombre_completo || '',
+          correoElectronico: clienteDatos.correo_electronico || '',
+          telefono: telefono,
+          fechaNacimiento: clienteDatos.fecha_nacimiento
+            ? new Date(clienteDatos.fecha_nacimiento).toISOString().split('T')[0]
+            : '',
+          ocupacion: clienteDatos.ocupacion || '',
+          direccion: clienteDatos.direccion || '',
+          estado: clienteDatos.estado || 'Activo'
+        };
+
+        // Replicar a Banco B
+        try {
+          await axios.post('http://localhost:3003/api/clientes/crear', datosCliente, { timeout: 5000 });
+          await axios.post('http://localhost:3003/api/cuentas/crear', {
+            iban: ibanB,
+            aliasCuenta: aliasCuenta,
+            moneda: moneda,
+            saldoActual: 0,
+            identificadorCliente: identificadorCliente
+          }, { timeout: 5000 });
+          await axios.post(BANCO_CENTRAL_URL + '/api/enrutamiento/registrar', {
+            identificadorCliente: identificadorCliente,
+            telefono: telefono,
+            iban: ibanB,
+            codigoBanco: 'B',
+            moneda: moneda
+          }, { timeout: 5000 });
+        } catch (errB) {
+          console.warn('Banco A: Error replicando cuenta a Banco B:', errB.message);
+        }
+
+        // Replicar a Banco C
+        try {
+          await axios.post('http://localhost:3004/api/clientes/crear', datosCliente, { timeout: 5000 });
+          await axios.post('http://localhost:3004/api/cuentas/crear', {
+            iban: ibanC,
+            aliasCuenta: aliasCuenta,
+            moneda: moneda,
+            saldoActual: 0,
+            identificadorCliente: identificadorCliente
+          }, { timeout: 5000 });
+          await axios.post(BANCO_CENTRAL_URL + '/api/enrutamiento/registrar', {
+            identificadorCliente: identificadorCliente,
+            telefono: telefono,
+            iban: ibanC,
+            codigoBanco: 'C',
+            moneda: moneda
+          }, { timeout: 5000 });
+        } catch (errC) {
+          console.warn('Banco A: Error replicando cuenta a Banco C:', errC.message);
+        }
+      }
+    } catch (errCentral) {
+      // No bloquear la creacion de cuenta si bancoCentral no responde
+      console.warn('Banco A: No se pudo registrar en Banco Central:', errCentral.message);
+    }
 
     return res.json({
       ok: true,

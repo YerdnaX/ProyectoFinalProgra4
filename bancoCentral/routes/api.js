@@ -4,7 +4,7 @@ var axios = require('axios');
 var database = require('./database');
 
 // ============================================================
-// Helpers internos
+// Helpers internos pa monedas y validaciones
 // ============================================================
 
 function normalizarTexto(valor) {
@@ -94,13 +94,10 @@ async function registrarHistorial(pool, datos) {
   return codigoOperacion;
 }
 
-// ============================================================
-// Endpoints de estado y catalogo
-// ============================================================
 
 /* ----------------------------------------------------------
    GET /api/status
-   Health check
+   salud del servico
    ---------------------------------------------------------- */
 router.get('/status', function (req, res) {
   return res.json({ ok: true, componente: 'BancoCentral', mensaje: 'Banco Central operativo' });
@@ -225,9 +222,7 @@ router.get('/cuentas', async function (req, res) {
   }
 });
 
-// ============================================================
-// Endpoints de enrutamiento
-// ============================================================
+
 
 /* ----------------------------------------------------------
    GET /api/enrutamiento/por-telefono/:telefono
@@ -314,8 +309,6 @@ router.get('/enrutamiento/por-cuenta/:iban', async function (req, res) {
 /* ----------------------------------------------------------
    POST /api/enrutamiento/registrar
    Registra una cuenta en la tabla de enrutamiento.
-   Llamado por bancos destino al crear cuentas (req #15).
-   Body: { identificadorCliente, telefono, iban, codigoBanco, moneda }
    ---------------------------------------------------------- */
 router.post('/enrutamiento/registrar', async function (req, res) {
   try {
@@ -375,9 +368,6 @@ router.post('/enrutamiento/registrar', async function (req, res) {
   }
 });
 
-// ============================================================
-// Endpoints de historial
-// ============================================================
 
 /* ----------------------------------------------------------
    GET /api/historial
@@ -432,23 +422,11 @@ router.get('/historial', async function (req, res) {
   }
 });
 
-// ============================================================
-// Transferencia interbancaria por numero telefonico (req #16)
-// ============================================================
 
 /* ----------------------------------------------------------
    POST /api/transferencia/por-telefono
    El banco emisor envía fondos al destinatario identificado
    por su numero de telefono. Aplica comision en banco origen.
-
-   Body:
-   {
-     ibanOrigen:  "CRXXX...",     // cuenta que envia (en cualquier banco)
-     telefonoDestino: "8888-1200", // a quien va el dinero
-     monto: 50000,
-     moneda: "CRC",
-     descripcion: "Pago servicio"
-   }
    ---------------------------------------------------------- */
 router.post('/transferencia/por-telefono', async function (req, res) {
   const pool = await database.poolPromise;
@@ -543,12 +521,14 @@ router.post('/transferencia/por-telefono', async function (req, res) {
     const urlDestino = destinoEnrut.url_base + ':' + destinoEnrut.puerto;
 
     // 3. Ejecutar retiro CON comision en banco origen
+    // Se envian ambos campos: cuentaRetiro (Banco A) e iban (Banco B/C)
     let respuestaRetiro;
     try {
       respuestaRetiro = await llamarBanco(
         urlOrigen + '/api/transacciones/retiro',
         'post',
         {
+          cuentaRetiro: ibanOrigen,
           iban: ibanOrigen,
           monto: monto,
           moneda: moneda,
@@ -588,12 +568,14 @@ router.post('/transferencia/por-telefono', async function (req, res) {
     }
 
     // 4. Ejecutar deposito en banco destino
+    // Se envian ambos campos: cuentaDeposito (Banco A) e iban (Banco B/C)
     let respuestaDeposito;
     try {
       respuestaDeposito = await llamarBanco(
         urlDestino + '/api/transacciones/deposito',
         'post',
         {
+          cuentaDeposito: destinoEnrut.iban,
           iban: destinoEnrut.iban,
           monto: monto,
           moneda: moneda,
@@ -653,24 +635,10 @@ router.post('/transferencia/por-telefono', async function (req, res) {
   }
 });
 
-// ============================================================
-// Transferencia por numero de cuenta desde B/C hacia A (req #17)
-// ============================================================
-
 /* ----------------------------------------------------------
    POST /api/transferencia/por-cuenta
    Trae fondos desde Banco B o Banco C hacia Banco A.
    Requiere mismo identificador de cliente y misma moneda.
-   No genera comision (req #17).
-
-   Body:
-   {
-     ibanOrigen:  "CRxxx...",   // cuenta en banco B o C
-     ibanDestino: "CRyyy...",   // cuenta en banco A
-     monto: 100000,
-     moneda: "CRC",
-     descripcion: "Traer fondos a Banco A"
-   }
    ---------------------------------------------------------- */
 router.post('/transferencia/por-cuenta', async function (req, res) {
   const pool = await database.poolPromise;
@@ -696,7 +664,7 @@ router.post('/transferencia/por-cuenta', async function (req, res) {
       return res.status(400).json({ ok: false, reason: 'INVALID_AMOUNT', message: 'El monto debe ser mayor a cero.' });
     }
 
-    // 1. Buscar enrutamiento de ambas cuentas
+    // Buscar enrutamiento de ambas cuentas
     const enrutResult = await pool
       .request()
       .input('ibanOrigen', database.sql.VarChar(34), ibanOrigen)
@@ -733,7 +701,7 @@ router.post('/transferencia/por-cuenta', async function (req, res) {
       descripcion: descripcion
     };
 
-    // 2. Validar que el destino sea Banco A
+    // Validar que el destino sea Banco A
     if (destinoEnrut.codigo_banco !== 'A') {
       await registrarHistorial(pool, Object.assign({}, historialDatos, {
         resultado: 'Fallida',
@@ -747,7 +715,7 @@ router.post('/transferencia/por-cuenta', async function (req, res) {
       });
     }
 
-    // 3. Validar que el origen sea Banco B o C
+    // Validar que el origen sea Banco B o C
     if (!['B', 'C'].includes(origenEnrut.codigo_banco)) {
       await registrarHistorial(pool, Object.assign({}, historialDatos, {
         resultado: 'Fallida',
@@ -761,7 +729,7 @@ router.post('/transferencia/por-cuenta', async function (req, res) {
       });
     }
 
-    // 4. Validar mismo cliente
+    // Validar mismo cliente
     if (origenEnrut.identificador_cliente !== destinoEnrut.identificador_cliente) {
       await registrarHistorial(pool, Object.assign({}, historialDatos, {
         resultado: 'Fallida',
@@ -775,7 +743,7 @@ router.post('/transferencia/por-cuenta', async function (req, res) {
       });
     }
 
-    // 5. Validar misma moneda en el enrutamiento
+    // Validar misma moneda en el enrutamiento
     if (origenEnrut.moneda !== destinoEnrut.moneda) {
       await registrarHistorial(pool, Object.assign({}, historialDatos, {
         resultado: 'Fallida',
@@ -792,7 +760,7 @@ router.post('/transferencia/por-cuenta', async function (req, res) {
     const urlOrigen = origenEnrut.url_base + ':' + origenEnrut.puerto;
     const urlDestino = destinoEnrut.url_base + ':' + destinoEnrut.puerto;
 
-    // 6. Retiro SIN comision en banco origen (B o C)
+    // Retiro SIN comision en banco origen (B o C)
     let respuestaRetiro;
     try {
       respuestaRetiro = await llamarBanco(
@@ -833,7 +801,7 @@ router.post('/transferencia/por-cuenta', async function (req, res) {
       return res.status(409).json({ ok: false, reason: 'WITHDRAWAL_REJECTED', message: respuestaRetiro.message });
     }
 
-    // 7. Deposito en Banco A (puraviabanco usa su propio endpoint /api/transacciones/deposito)
+    // Deposito en Banco A (puraviabanco usa su propio endpoint /api/transacciones/deposito)
     let respuestaDeposito;
     try {
       respuestaDeposito = await llamarBanco(
@@ -863,7 +831,7 @@ router.post('/transferencia/por-cuenta', async function (req, res) {
       });
     }
 
-    // 8. Registrar historial exitoso
+    // Registrar historial exitoso
     const codigoOp = await registrarHistorial(pool, Object.assign({}, historialDatos, {
       resultado: 'Exitosa'
     }));
@@ -897,23 +865,11 @@ router.post('/transferencia/por-cuenta', async function (req, res) {
   }
 });
 
-// ============================================================
-// Pago desde sistema de restaurante (req #20)
-// ============================================================
-
 /* ----------------------------------------------------------
    POST /api/pago-restaurante
-   El sistema de restaurante (puravia) envia el numero de cuenta
+   El sistema de restaurante envia el numero de cuenta
    del cliente y el monto a cobrar. El Banco Central identifica
-   el banco, ejecuta el retiro y registra en el historial.
-
-   Body:
-   {
-     numeroCuenta: "CRxxx...",  // IBAN del cliente
-     monto: 15000,
-     moneda: "CRC",
-     descripcion: "Pago factura #123 - Restaurante Pura Vida"
-   }
+   el banco y ahi ejecuta el retiro y registra en el historial.
    ---------------------------------------------------------- */
 router.post('/pago-restaurante', async function (req, res) {
   const pool = await database.poolPromise;
@@ -981,23 +937,20 @@ router.post('/pago-restaurante', async function (req, res) {
     }
 
     const urlBanco = enrut.url_base + ':' + enrut.puerto;
-    const payloadRetiro = (enrut.codigo_banco === 'A')
-      ? {
-        cuentaRetiro: numeroCuenta,
-        monto: monto,
-        moneda: moneda,
-        descripcion: descripcion
-      }
-      : {
-        iban: numeroCuenta,
-        monto: monto,
-        moneda: moneda,
-        descripcion: descripcion,
-        tipoTransaccion: 'Retiro',
-        sinComision: false
-      };
 
-    // 2. Ejecutar retiro en el banco correspondiente
+    // Se envian ambos campos (cuentaRetiro para Banco A, iban para B/C)
+    // para que cada banco encuentre el campo que espera
+    const payloadRetiro = {
+      cuentaRetiro: numeroCuenta,
+      iban: numeroCuenta,
+      monto: monto,
+      moneda: moneda,
+      descripcion: descripcion,
+      tipoTransaccion: 'Retiro',
+      sinComision: false
+    };
+
+    // Ejecutar retiro en el banco correspondiente
     let respuestaRetiro;
     try {
       respuestaRetiro = await llamarBanco(
@@ -1035,7 +988,7 @@ router.post('/pago-restaurante', async function (req, res) {
       });
     }
 
-    // 3. Registrar historial exitoso
+    // Registrar historial exitoso
     const codigoOp = await registrarHistorial(pool, Object.assign({}, historialDatos, {
       resultado: 'Exitosa'
     }));

@@ -16,6 +16,112 @@ SET QUOTED_IDENTIFIER ON;
 GO
 
 /* ----------------------------------------------------------
+   Limpieza de datos de prueba previos
+   ---------------------------------------------------------- */
+DELETE FROM dbo.TRANSACCION_RETIRO
+WHERE codigo_transaccion_retiro IN ('TRX-CT1002')
+   OR codigo_transaccion_comision IN ('COM-CT1002');
+
+DELETE FROM dbo.TRANSACCION
+WHERE codigo_transaccion IN ('TRX-CT1001', 'TRX-CT1002', 'COM-CT1002', 'TRX-CT2001');
+
+DELETE FROM dbo.CUENTA_BANCARIA
+WHERE iban IN ('CR4400440044C0440044', 'CR4400440044C0440055', 'CR8800880088C9990003');
+
+DELETE FROM dbo.CLIENTE
+WHERE identificador_cliente IN ('4-7890-1234', '7-3333-4444');
+GO
+
+/* ----------------------------------------------------------
+   Cliente Valeria (4-7890-1234) replicado desde Banco A
+   Permite probar el flujo de "traer fondos" C -> A
+   ---------------------------------------------------------- */
+IF NOT EXISTS (
+    SELECT 1
+    FROM dbo.CLIENTE
+    WHERE identificador_cliente = '4-7890-1234'
+)
+BEGIN
+    INSERT INTO dbo.CLIENTE (
+        identificador_cliente,
+        nombre_completo,
+        correo_electronico,
+        telefono,
+        fecha_nacimiento,
+        ocupacion,
+        direccion,
+        fecha_creacion,
+        estado
+    )
+    VALUES (
+        '4-7890-1234',
+        N'Valeria Chaves Mora',
+        N'valeria.chaves@bpv.cr',
+        '8822-4411',
+        '1994-08-21',
+        N'Ingeniera Industrial',
+        N'Heredia, San Pablo',
+        DATEADD(DAY, -7, SYSDATETIME()),
+        'Activo'
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM dbo.CUENTA_BANCARIA
+    WHERE iban = 'CR4400440044C0440044'
+)
+BEGIN
+    INSERT INTO dbo.CUENTA_BANCARIA (
+        iban,
+        alias_cuenta,
+        moneda,
+        saldo_actual,
+        identificador_cliente,
+        fecha_creacion,
+        estado
+    )
+    VALUES (
+        'CR4400440044C0440044',
+        N'Cuenta operativa Valeria',
+        'CRC',
+        0.00,
+        '4-7890-1234',
+        DATEADD(DAY, -7, SYSDATETIME()),
+        'Activa'
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM dbo.CUENTA_BANCARIA
+    WHERE iban = 'CR4400440044C0440055'
+)
+BEGIN
+    INSERT INTO dbo.CUENTA_BANCARIA (
+        iban,
+        alias_cuenta,
+        moneda,
+        saldo_actual,
+        identificador_cliente,
+        fecha_creacion,
+        estado
+    )
+    VALUES (
+        'CR4400440044C0440055',
+        N'Ahorro USD Valeria',
+        'USD',
+        0.00,
+        '4-7890-1234',
+        DATEADD(DAY, -7, SYSDATETIME()),
+        'Activa'
+    );
+END;
+GO
+
+/* ----------------------------------------------------------
    Cliente y cuenta inactivos para pruebas de validacion
    ---------------------------------------------------------- */
 IF NOT EXISTS (

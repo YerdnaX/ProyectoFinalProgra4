@@ -253,3 +253,30 @@ POST http://localhost:3000/api/pago-bancario \
   -d "{\"ordenId\":1,\"numeroCuenta\":\"CR440044004400440044\",\"moneda\":\"CRC\",\"descripcion\":\"Pago factura orden #1 - prueba postman\"}"
 
 
+
+Orden recomendado para correr todo desde cero:
+
+SistemaBancarioCREADOR.sql
+bancoBCREADOR.sql
+bancoCCreador.sql
+bancoCentralCREADOR.sql
+CreadorDatostest.sql
+creadordatostestpuraviabanco.sql
+creadordatostestbancoB.sql
+creadordatostestbancoC.sql
+creadordatostestpuravia.sql
+creadordatostestbancoCentral.sql
+
+
+
+Envio dinero
+
+CR44 0044 0044 0044 0044 banco A
+8822-4411 Banco C
+
+
+traer dinero
+Valeria 
+CR44 0044 0044 0044 0044 Banco A
+CR4400440044B0440044 banco B
+
